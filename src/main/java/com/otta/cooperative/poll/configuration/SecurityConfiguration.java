@@ -52,6 +52,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/authentication", "/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
                         "/configuration/**", "/swagger-ui.html", "/webjars/**", "/h2-console/**", "/console/**")
                 .permitAll()
+                //.antMatchers("/api/v1/user/**")
+                //.permitAll()
                 // Qualquer outra requisição deve ser checada
                 .anyRequest().authenticated().and().exceptionHandling();
                 //.authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
