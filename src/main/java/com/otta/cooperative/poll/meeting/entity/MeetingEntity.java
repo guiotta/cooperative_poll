@@ -2,11 +2,15 @@ package com.otta.cooperative.poll.meeting.entity;
 
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -17,6 +21,9 @@ public class MeetingEntity {
     private Long id;
     @Column(name = "subject")
     private String subject;
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @JoinColumn(name = "poll_id", referencedColumnName = "id")
+    private PollEntity poll;
 
     public MeetingEntity() { }
 
@@ -41,9 +48,17 @@ public class MeetingEntity {
         this.subject = subject;
     }
 
+    public PollEntity getPoll() {
+        return poll;
+    }
+
+    public void setPoll(PollEntity poll) {
+        this.poll = poll;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(id, subject);
+        return Objects.hash(id, poll, subject);
     }
 
     @Override
@@ -55,7 +70,8 @@ public class MeetingEntity {
             return false;
         }
         MeetingEntity other = (MeetingEntity) obj;
-        return Objects.equals(id, other.id) && Objects.equals(subject, other.subject);
+        return Objects.equals(id, other.id) && Objects.equals(poll, other.poll)
+                && Objects.equals(subject, other.subject);
     }
 
     @Override
@@ -65,6 +81,8 @@ public class MeetingEntity {
         builder.append(id);
         builder.append(", subject=");
         builder.append(subject);
+        builder.append(", poll=");
+        builder.append(poll);
         builder.append("]");
         return builder.toString();
     }
