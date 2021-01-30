@@ -51,7 +51,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v1/authentication", "/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
                         "/configuration/**", "/swagger-ui.html", "/webjars/**", "/h2-console/**", "/console/**")
                 .permitAll()
-                .antMatchers("/api/v1/user/**")
+                .antMatchers("/api/v1/user/**", "/api/v1/meeting/**")
                 .permitAll()
                 // Qualquer outra requisição deve ser checada
                 .anyRequest().authenticated().and().exceptionHandling();

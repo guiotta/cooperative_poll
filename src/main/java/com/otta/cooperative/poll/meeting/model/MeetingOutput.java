@@ -1,26 +1,14 @@
-package com.otta.cooperative.poll.meeting.entity;
+package com.otta.cooperative.poll.meeting.model;
 
 import java.util.Objects;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "meeting")
-public class MeetingEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class MeetingOutput {
     private Long id;
-    @Column(name = "subject")
     private String subject;
 
-    public MeetingEntity() { }
+    public MeetingOutput() { }
 
-    public MeetingEntity(Long id, String subject) {
+    public MeetingOutput(Long id, String subject) {
         this.id = id;
         this.subject = subject;
     }
@@ -51,17 +39,17 @@ public class MeetingEntity {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof MeetingEntity)) {
+        if (!(obj instanceof MeetingOutput)) {
             return false;
         }
-        MeetingEntity other = (MeetingEntity) obj;
+        MeetingOutput other = (MeetingOutput) obj;
         return Objects.equals(id, other.id) && Objects.equals(subject, other.subject);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("MeetingEntity [id=");
+        builder.append("MeetingOutput [id=");
         builder.append(id);
         builder.append(", subject=");
         builder.append(subject);
