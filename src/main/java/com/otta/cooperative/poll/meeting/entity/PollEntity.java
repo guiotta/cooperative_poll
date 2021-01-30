@@ -78,7 +78,7 @@ public class PollEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(close, enabled, id, meeting, open);
+        return Objects.hash(close, enabled, id, open);
     }
 
     @Override
@@ -91,8 +91,7 @@ public class PollEntity {
         }
         PollEntity other = (PollEntity) obj;
         return Objects.equals(close, other.close) && Objects.equals(enabled, other.enabled)
-                && Objects.equals(id, other.id) && Objects.equals(meeting, other.meeting)
-                && Objects.equals(open, other.open);
+                && Objects.equals(id, other.id) && Objects.equals(open, other.open);
     }
 
     @Override
@@ -106,8 +105,6 @@ public class PollEntity {
         builder.append(close);
         builder.append(", enabled=");
         builder.append(enabled);
-        builder.append(", meeting=");
-        builder.append(meeting);
         builder.append("]");
         return builder.toString();
     }
