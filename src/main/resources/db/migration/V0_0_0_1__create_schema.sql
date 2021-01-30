@@ -85,6 +85,7 @@ DROP TABLE IF EXISTS `meeting`;
 CREATE TABLE `meeting` (
   `id` BIGINT(11) NOT NULL AUTO_INCREMENT,
   `subject` VARCHAR(128) NOT NULL,
+  `poll_id` BIGINT(11) NULL,
   PRIMARY KEY (`id`)
 );
 
@@ -100,7 +101,6 @@ CREATE TABLE `poll` (
   `open_date` DATETIME NOT NULL,
   `close_date` DATETIME NOT NULL,
   `enabled` bit NOT NULL DEFAULT true,
-  `meeting_id` BIGINT(11) NOT NULL,
   PRIMARY KEY (`id`)
 );
 
@@ -140,7 +140,7 @@ ALTER TABLE `roles_privileges` ADD FOREIGN KEY (role_id) REFERENCES `role` (`id`
 ALTER TABLE `roles_privileges` ADD FOREIGN KEY (privilege_id) REFERENCES `privilege` (`id`);
 ALTER TABLE `users_roles` ADD FOREIGN KEY (user_id) REFERENCES `user` (`id`);
 ALTER TABLE `users_roles` ADD FOREIGN KEY (role_id) REFERENCES `role` (`id`);
-ALTER TABLE `poll` ADD FOREIGN KEY (meeting_id) REFERENCES `meeting` (`id`);
+ALTER TABLE `meeting` ADD FOREIGN KEY (poll_id) REFERENCES `poll` (`id`);
 ALTER TABLE `vote` ADD FOREIGN KEY (poll_id) REFERENCES `poll` (`id`);
 ALTER TABLE `vote` ADD FOREIGN KEY (vote_option_id) REFERENCES `vote_option` (`id`);
 ALTER TABLE `vote` ADD FOREIGN KEY (user_id) REFERENCES `user` (`id`);
@@ -150,36 +150,3 @@ ALTER TABLE `vote` ADD FOREIGN KEY (user_id) REFERENCES `user` (`id`);
 -- ---
 
 ALTER TABLE `user` ADD CONSTRAINT USER_DOCUMENT_UNIQUE UNIQUE(DOCUMENT);
-
--- ALTER TABLE `user` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
--- ALTER TABLE `role` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
--- ALTER TABLE `privilege` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
--- ALTER TABLE `roles_privileges` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
--- ALTER TABLE `users_roles` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
--- ALTER TABLE `meeting` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
--- ALTER TABLE `poll` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
--- ALTER TABLE `vote` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
--- ALTER TABLE `vote_option` ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
--- ---
--- Test Data
--- ---
-
--- INSERT INTO `user` (`id`,`name`,`enabled`,`document`,`password`) VALUES
--- ('','','','','');
--- INSERT INTO `role` (`id`,`name`) VALUES
--- ('','');
--- INSERT INTO `privilege` (`id`,`name`) VALUES
--- ('','');
--- INSERT INTO `roles_privileges` (`id`,`role_id`,`privilege_id`) VALUES
--- ('','','');
--- INSERT INTO `users_roles` (`id`,`user_id`,`role_id`) VALUES
--- ('','','');
--- INSERT INTO `meeting` (`id`,`subject`) VALUES
--- ('','');
--- INSERT INTO `poll` (`id`,`open_date`,`close_date`,`enabled`,`meeting_id`) VALUES
--- ('','','','','');
--- INSERT INTO `vote` (`id`,`poll_id`,`vote_option_id`,`user_id`) VALUES
--- ('','','','');
--- INSERT INTO `vote_option` (`id`,`label`) VALUES
--- ('','');
