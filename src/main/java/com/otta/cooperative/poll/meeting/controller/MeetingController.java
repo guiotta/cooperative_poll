@@ -1,10 +1,13 @@
 package com.otta.cooperative.poll.meeting.controller;
 
+import java.util.Collection;
+
 import javax.validation.Valid;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,5 +30,10 @@ public class MeetingController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MeetingOutput> saveMeeting(@Valid @RequestBody MeetingInput input) {
         return ResponseEntity.ok(meetingService.save(input));
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<MeetingOutput>> findAll() {
+        return ResponseEntity.ok(meetingService.findAll());
     }
 }

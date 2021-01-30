@@ -1,5 +1,8 @@
 package com.otta.cooperative.poll.meeting.service;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.otta.cooperative.poll.meeting.entity.MeetingEntity;
@@ -22,6 +25,11 @@ public class MeetingService {
         return map(entity);
     }
 
+    public Collection<MeetingOutput> findAll() {
+        Collection<MeetingEntity> entities = meetingRepository.findAll();
+        return entities.stream().map(entity -> map(entity)).collect(Collectors.toList());
+    }
+
     private MeetingEntity map(MeetingInput input) {
         MeetingEntity entity = new MeetingEntity();
         entity.setSubject(input.getSubject());
@@ -30,7 +38,7 @@ public class MeetingService {
     }
     private MeetingOutput map(MeetingEntity entity) {
         MeetingOutput output = new MeetingOutput(entity.getId(), entity.getSubject());
-        
+
         return output;
     }
 }
