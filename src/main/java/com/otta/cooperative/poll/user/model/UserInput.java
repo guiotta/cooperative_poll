@@ -2,9 +2,15 @@ package com.otta.cooperative.poll.user.model;
 
 import java.util.Objects;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
 public class UserInput {
+    @Size(min = 11, max = 11, message = "Document must be a CPF with 11 characters.")
     private String document;
+    @NotBlank
     private String name;
+    @NotBlank
     private String password;
 
     public UserInput() { }

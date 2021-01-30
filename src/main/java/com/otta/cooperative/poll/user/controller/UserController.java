@@ -1,5 +1,7 @@
 package com.otta.cooperative.poll.user.controller;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -29,7 +31,7 @@ public class UserController {
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserOutput> saveUser(@RequestBody UserInput input) {
+    public ResponseEntity<UserOutput> saveUser(@Valid @RequestBody UserInput input) {
         lOGGER.info("Adding new user {} in database.", input);
         return ResponseEntity.ok(userService.save(input));
     }
