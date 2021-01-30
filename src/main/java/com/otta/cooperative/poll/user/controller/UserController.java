@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.otta.cooperative.poll.user.UserService;
 import com.otta.cooperative.poll.user.model.UserInput;
 import com.otta.cooperative.poll.user.model.UserOutput;
+import com.otta.cooperative.poll.user.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1/user")

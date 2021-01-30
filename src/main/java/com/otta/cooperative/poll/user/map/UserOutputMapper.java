@@ -11,7 +11,6 @@ import com.otta.cooperative.poll.user.model.UserOutput;
 public class UserOutputMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserOutputMapper.class);
 
-
     public UserOutput map(UserEntity entity) {
         UserOutput output = new UserOutput(entity.getId(), entity.getDocument(), entity.getName());
         LOGGER.info("Mapping UserEntity {} to UserOutput {}.", entity, output);

@@ -1,4 +1,4 @@
-package com.otta.cooperative.poll.user;
+package com.otta.cooperative.poll.user.service;
 
 import java.util.Optional;
 
