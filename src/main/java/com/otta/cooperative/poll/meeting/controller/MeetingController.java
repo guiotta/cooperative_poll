@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.otta.cooperative.poll.meeting.model.MeetingInput;
 import com.otta.cooperative.poll.meeting.model.MeetingOutput;
+import com.otta.cooperative.poll.meeting.model.poll.PollInput;
+import com.otta.cooperative.poll.meeting.model.poll.PollOutput;
 import com.otta.cooperative.poll.meeting.service.MeetingService;
 
 @RestController
@@ -35,5 +37,10 @@ public class MeetingController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<MeetingOutput>> findAll() {
         return ResponseEntity.ok(meetingService.findAll());
+    }
+
+    @PostMapping(value = "/poll", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PollOutput> savePoll(@Valid @RequestBody PollInput input) {
+        return ResponseEntity.ok(meetingService.save(input));
     }
 }
