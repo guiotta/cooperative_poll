@@ -15,18 +15,18 @@ import com.otta.cooperative.poll.vote.model.VoteInput;
 import com.otta.cooperative.poll.vote.model.VoteOutput;
 import com.otta.cooperative.poll.vote.repository.VoteOptionRepository;
 import com.otta.cooperative.poll.vote.repository.VoteRepository;
-import com.otta.cooperative.poll.vote.validation.PollOpenValidation;
+import com.otta.cooperative.poll.vote.validation.PollOpenValidator;
 
 @Service
 public class VoteService {
     private final VoteRepository voteRepository;
     private final VoteOptionRepository voteOptionRepository;
     private final PollRepository pollRepository;
-    private final PollOpenValidation pollOpenValidation;
+    private final PollOpenValidator pollOpenValidation;
     private final UserEntityLoggedConverter userEntityLoggedConverter;
 
     public VoteService(VoteRepository voteRepository, VoteOptionRepository voteOptionRepository,
-            PollRepository pollRepository, PollOpenValidation pollOpenValidation,
+            PollRepository pollRepository, PollOpenValidator pollOpenValidation,
             UserEntityLoggedConverter userEntityLoggedConverter) {
         this.voteRepository = voteRepository;
         this.voteOptionRepository = voteOptionRepository;
