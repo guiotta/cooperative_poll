@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 public class JobDetailFactory {
 
     public JobDetail create() {
-        return JobBuilder.newJob(PollEndJob.class).build();
+        return JobBuilder
+                .newJob(PollEndJob.class)
+                .build();
     }
 }
