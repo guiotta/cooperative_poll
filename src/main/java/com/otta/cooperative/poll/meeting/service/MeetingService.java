@@ -1,15 +1,28 @@
 package com.otta.cooperative.poll.meeting.service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SchedulerFactory;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.otta.cooperative.poll.meeting.entity.MeetingEntity;
 import com.otta.cooperative.poll.meeting.entity.PollEntity;
+import com.otta.cooperative.poll.meeting.job.PollEndJob;
 import com.otta.cooperative.poll.meeting.mapper.MeetingEntityMapper;
 import com.otta.cooperative.poll.meeting.mapper.MeetingOutputMapper;
 import com.otta.cooperative.poll.meeting.mapper.PollEntityMapper;
@@ -19,6 +32,7 @@ import com.otta.cooperative.poll.meeting.model.MeetingOutput;
 import com.otta.cooperative.poll.meeting.model.poll.PollInput;
 import com.otta.cooperative.poll.meeting.model.poll.PollOutput;
 import com.otta.cooperative.poll.meeting.repository.MeetingRepository;
+import com.otta.cooperative.poll.meeting.repository.PollRepository;
 
 @Service
 public class MeetingService {
@@ -26,15 +40,17 @@ public class MeetingService {
 
     
     private final MeetingRepository meetingRepository;
+    private final PollRepository pollRepository;
     private final MeetingEntityMapper meetingEntityMapper;
     private final MeetingOutputMapper meetingOutputMapper;
     private final PollEntityMapper pollEntityMapper;
     private final PollOutputMapper pollOutputMapper;
 
-    public MeetingService(MeetingRepository meetingRepository, MeetingEntityMapper meetingEntityMapper,
-            MeetingOutputMapper meetingOutputMapper, PollEntityMapper pollEntityMapper,
-            PollOutputMapper pollOutputMapper) {
+    public MeetingService(MeetingRepository meetingRepository, PollRepository pollRepository,
+            MeetingEntityMapper meetingEntityMapper, MeetingOutputMapper meetingOutputMapper,
+            PollEntityMapper pollEntityMapper, PollOutputMapper pollOutputMapper) {
         this.meetingRepository = meetingRepository;
+        this.pollRepository = pollRepository;
         this.meetingEntityMapper = meetingEntityMapper;
         this.meetingOutputMapper = meetingOutputMapper;
         this.pollEntityMapper = pollEntityMapper;
@@ -56,7 +72,7 @@ public class MeetingService {
                 .collect(Collectors.toList());
     }
 
-    public PollOutput save(PollInput input) {
+    public PollOutput save(PollInput input) throws SchedulerException {
         Optional<MeetingEntity> optionalMeeting = meetingRepository.findById(input.getMeetingId());
 
         if (optionalMeeting.isPresent()) {
@@ -69,6 +85,8 @@ public class MeetingService {
                 meetingEntity.setPoll(pollEntity);
                 meetingEntity = meetingRepository.save(meetingEntity);
 
+                this.scheduleJob(pollEntity.getClose(), pollEntity.getId());
+
                 return pollOutputMapper.map(meetingEntity.getPoll());
             }
             LOGGER.debug("Meeting with Id {} already has a poll. Poll Id {}.", meetingEntity.getId(), meetingEntity.getPoll().getId());
@@ -76,5 +94,23 @@ public class MeetingService {
         }
         LOGGER.debug("Could not find any Meeting with id {}.", input.getMeetingId());
         throw new IllegalArgumentException(String.format("Could not find a Meeting to add a Poll."));
+    }
+
+    private void scheduleJob(LocalDateTime executeDateTime, Long pollId) throws SchedulerException {
+        //JobDataMap dataMap = new JobDataMap();
+        //dataMap.put("pollId", pollId);
+
+        SchedulerFactory factory = new StdSchedulerFactory();
+        Scheduler scheduler = factory.getScheduler();
+        scheduler.start();
+        JobDetail job = JobBuilder.newJob(PollEndJob.class).build();
+        job.getJobDataMap().put("pollId", pollId);
+        job.getJobDataMap().put("pollRepository", pollRepository);
+        Trigger trigger = TriggerBuilder.newTrigger()
+                                        //.usingJobData(dataMap)
+                                        .startAt(Timestamp.valueOf(executeDateTime))
+                                        //.withSchedule(SimpleScheduleBuilder.simpleSchedule())
+                                        .build();
+        scheduler.scheduleJob(job, trigger);
     }
 }

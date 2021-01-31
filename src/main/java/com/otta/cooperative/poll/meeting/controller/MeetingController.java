@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.validation.Valid;
 
+import org.quartz.SchedulerException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -40,7 +41,7 @@ public class MeetingController {
     }
 
     @PostMapping(value = "/poll", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PollOutput> savePoll(@Valid @RequestBody PollInput input) {
+    public ResponseEntity<PollOutput> savePoll(@Valid @RequestBody PollInput input) throws SchedulerException {
         return ResponseEntity.ok(meetingService.save(input));
     }
 }
