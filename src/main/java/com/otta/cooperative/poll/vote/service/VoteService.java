@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.otta.cooperative.poll.meeting.entity.PollEntity;
 import com.otta.cooperative.poll.meeting.repository.PollRepository;
+import com.otta.cooperative.poll.user.converter.UserEntityLoggedConverter;
 import com.otta.cooperative.poll.user.entity.UserEntity;
-import com.otta.cooperative.poll.user.repository.UserRepository;
 import com.otta.cooperative.poll.vote.entity.VoteEntity;
 import com.otta.cooperative.poll.vote.entity.VoteOptionEntity;
 import com.otta.cooperative.poll.vote.model.VoteInput;
@@ -21,23 +21,24 @@ import com.otta.cooperative.poll.vote.validation.PollOpenValidation;
 public class VoteService {
     private final VoteRepository voteRepository;
     private final VoteOptionRepository voteOptionRepository;
-    private final UserRepository userRepository;
     private final PollRepository pollRepository;
     private final PollOpenValidation pollOpenValidation;
+    private final UserEntityLoggedConverter userEntityLoggedConverter;
 
     public VoteService(VoteRepository voteRepository, VoteOptionRepository voteOptionRepository,
-            UserRepository userRepository, PollRepository pollRepository, PollOpenValidation pollOpenValidation) {
+            PollRepository pollRepository, PollOpenValidation pollOpenValidation,
+            UserEntityLoggedConverter userEntityLoggedConverter) {
         this.voteRepository = voteRepository;
         this.voteOptionRepository = voteOptionRepository;
-        this.userRepository = userRepository;
         this.pollRepository = pollRepository;
         this.pollOpenValidation = pollOpenValidation;
+        this.userEntityLoggedConverter = userEntityLoggedConverter;
     }
 
     public VoteOutput saveVote(VoteInput input) {
         LocalDateTime dateTimeToProcessVote = LocalDateTime.now();
         Optional<VoteOptionEntity> optionalVoteOptionEntity = voteOptionRepository.findById(input.getVoteOptionId());
-        Optional<UserEntity> optionalUserEntity = userRepository.findById(input.getUserId());
+        Optional<UserEntity> optionalUserEntity = userEntityLoggedConverter.convert();
         Optional<PollEntity> optionalPollEntity = pollRepository.findById(input.getPollId());
 
         if (optionalVoteOptionEntity.isPresent() && optionalUserEntity.isPresent() && optionalPollEntity.isPresent()) {
