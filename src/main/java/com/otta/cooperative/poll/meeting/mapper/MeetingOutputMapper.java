@@ -9,9 +9,7 @@ import com.otta.cooperative.poll.meeting.model.MeetingOutput;
 
 @Component
 public class MeetingOutputMapper {
-    
     private static final Logger LOGGER = LoggerFactory.getLogger(MeetingOutputMapper.class);
-
 
     public MeetingOutput map(MeetingEntity entity) {
         MeetingOutput output = new MeetingOutput(entity.getId(), entity.getSubject());
