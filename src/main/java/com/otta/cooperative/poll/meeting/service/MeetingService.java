@@ -45,7 +45,7 @@ public class MeetingService {
         this.pollEndJobScheduler = pollEndJobScheduler;
     }
 
-    public MeetingOutput save(MeetingInput input) {
+    public MeetingOutput saveMeeting(MeetingInput input) {
         MeetingEntity entity = meetingEntityMapper.map(input);
         entity = meetingRepository.save(entity);
 
@@ -60,7 +60,7 @@ public class MeetingService {
                 .collect(Collectors.toList());
     }
 
-    public PollOutput save(PollInput input) throws SchedulerException {
+    public PollOutput savePoll(PollInput input) throws SchedulerException {
         Optional<MeetingEntity> optionalMeeting = meetingRepository.findById(input.getMeetingId());
 
         if (optionalMeeting.isPresent()) {

@@ -32,7 +32,7 @@ public class MeetingController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MeetingOutput> saveMeeting(@Valid @RequestBody MeetingInput input) {
-        return ResponseEntity.ok(meetingService.save(input));
+        return ResponseEntity.ok(meetingService.saveMeeting(input));
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -42,6 +42,6 @@ public class MeetingController {
 
     @PostMapping(value = "/poll", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PollOutput> savePoll(@Valid @RequestBody PollInput input) throws SchedulerException {
-        return ResponseEntity.ok(meetingService.save(input));
+        return ResponseEntity.ok(meetingService.savePoll(input));
     }
 }
