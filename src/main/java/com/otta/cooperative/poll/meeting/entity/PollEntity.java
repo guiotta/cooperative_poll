@@ -1,15 +1,20 @@
 package com.otta.cooperative.poll.meeting.entity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.otta.cooperative.poll.vote.entity.VoteEntity;
 
 @Entity
 @Table(name = "poll")
@@ -23,12 +28,20 @@ public class PollEntity {
     private LocalDateTime close;
     @Column(name = "enabled")
     private Boolean enabled;
+
     @OneToOne(mappedBy = "poll")
     private MeetingEntity meeting;
+    @OneToMany
+    @JoinColumn(name = "poll_id") // we need to duplicate the physical information
+    private Collection<VoteEntity> votes;
 
-    public PollEntity() { }
+    public PollEntity() {
+        this.votes = new HashSet<>();
+    }
 
     public PollEntity(Long id, LocalDateTime open, LocalDateTime close, Boolean enabled, MeetingEntity meeting) {
+        this();
+
         this.id = id;
         this.open = open;
         this.close = close;
@@ -66,6 +79,14 @@ public class PollEntity {
 
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public Collection<VoteEntity> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(Collection<VoteEntity> votes) {
+        this.votes = votes;
     }
 
     public MeetingEntity getMeeting() {
