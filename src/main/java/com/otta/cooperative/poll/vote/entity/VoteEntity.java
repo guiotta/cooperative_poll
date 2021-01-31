@@ -22,13 +22,13 @@ public class VoteEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    @JoinColumn(name = "poll_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "poll_id", referencedColumnName = "id", updatable = false)
     private PollEntity pollEntity;
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    @JoinColumn(name = "vote_option_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "vote_option_id", referencedColumnName = "id", updatable = false)
     private VoteOptionEntity voteOptionEntity;
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", updatable = false)
     private UserEntity userEntity;
 
     public VoteEntity() { }

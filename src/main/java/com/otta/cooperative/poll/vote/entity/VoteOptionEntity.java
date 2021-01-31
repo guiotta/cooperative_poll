@@ -15,14 +15,14 @@ public class VoteOptionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name")
-    private String name;
+    @Column(name = "label")
+    private String label;
 
     public VoteOptionEntity() { }
 
-    public VoteOptionEntity(Long id, String name) {
+    public VoteOptionEntity(Long id, String label) {
         this.id = id;
-        this.name = name;
+        this.label = label;
     }
 
     public Long getId() {
@@ -33,17 +33,17 @@ public class VoteOptionEntity {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getLabel() {
+        return label;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id, label);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class VoteOptionEntity {
             return false;
         }
         VoteOptionEntity other = (VoteOptionEntity) obj;
-        return Objects.equals(id, other.id) && Objects.equals(name, other.name);
+        return Objects.equals(id, other.id) && Objects.equals(label, other.label);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class VoteOptionEntity {
         builder.append("VoteOption [id=");
         builder.append(id);
         builder.append(", name=");
-        builder.append(name);
+        builder.append(label);
         builder.append("]");
         return builder.toString();
     }
