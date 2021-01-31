@@ -24,3 +24,6 @@
 INSERT INTO `privilege` (`id`,`name`) VALUES (1 ,'Access all System');
 INSERT INTO `role` (`id`,`name`) VALUES (1, 'Basic User');
 INSERT INTO `roles_privileges` (`role_id`,`privilege_id`) VALUES (1, 1);
+
+INSERT INTO `vote_option` (`id`,`label`) VALUES (0, 'NO');
+INSERT INTO `vote_option` (`id`,`label`) VALUES (1,'YES');
