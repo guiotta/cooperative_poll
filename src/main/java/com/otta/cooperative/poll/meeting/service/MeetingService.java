@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.collections.api.bag.Bag;
+import org.eclipse.collections.impl.collector.Collectors2;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import com.otta.cooperative.poll.meeting.model.MeetingOutput;
 import com.otta.cooperative.poll.meeting.model.poll.PollInput;
 import com.otta.cooperative.poll.meeting.model.poll.PollOutput;
 import com.otta.cooperative.poll.meeting.repository.MeetingRepository;
+import com.otta.cooperative.poll.vote.entity.VoteOptionEntity;
 
 @Service
 public class MeetingService {
@@ -82,5 +85,20 @@ public class MeetingService {
         }
         LOGGER.debug("Could not find any Meeting with id {}.", input.getMeetingId());
         throw new IllegalArgumentException(String.format("Could not find a Meeting to add a Poll."));
+    }
+
+    public void generateResult(Long meetingId) {
+        Optional<MeetingEntity> optionalMeetingEntity = meetingRepository.findById(meetingId);
+
+        if (optionalMeetingEntity.isPresent()) {
+            MeetingEntity meetingEntity = optionalMeetingEntity.get();
+            Optional<PollEntity> optionalPollEntity = Optional.ofNullable(meetingEntity.getPoll());
+
+            if (optionalPollEntity.isPresent()) {
+                PollEntity pollEntity = optionalPollEntity.get();
+                Bag<VoteOptionEntity> votesBag = pollEntity.getVotes().stream().map(vote -> vote.getVoteOptionEntity()).collect(Collectors2.countBy(voteOption -> voteOption));
+                votesBag.size();
+            }
+        }
     }
 }

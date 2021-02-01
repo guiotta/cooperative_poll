@@ -13,7 +13,8 @@
     <artifactId>poll</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>poll</name>
-    <description>Projeto para cálculo das votações de um assembleia de Cooperativas</description>
+    <description>Projeto para cálculo das votações de um assembleia de
+        Cooperativas</description>
     <properties>
         <java.version>11</java.version>
     </properties>
@@ -37,6 +38,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.collections</groupId>
+            <artifactId>eclipse-collections-forkjoin</artifactId>
+            <version>11.0.0.M1</version>
         </dependency>
 
         <dependency>

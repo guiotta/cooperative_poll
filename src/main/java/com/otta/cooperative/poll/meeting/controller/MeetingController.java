@@ -44,4 +44,10 @@ public class MeetingController {
     public ResponseEntity<PollOutput> savePoll(@Valid @RequestBody PollInput input) throws SchedulerException {
         return ResponseEntity.ok(meetingService.savePoll(input));
     }
+
+    @GetMapping(value = "/result", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> pollResult() {
+        meetingService.generateResult(1l);
+        return ResponseEntity.ok("retorno");
+    }
 }
