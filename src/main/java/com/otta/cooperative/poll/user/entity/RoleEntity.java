@@ -97,10 +97,6 @@ public class RoleEntity {
         builder.append(id);
         builder.append(", name=");
         builder.append(name);
-        builder.append(", users=");
-        builder.append(users);
-        builder.append(", privileges=");
-        builder.append(privileges);
         builder.append("]");
         return builder.toString();
     }

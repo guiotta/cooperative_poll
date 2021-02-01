@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,20 +13,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.otta.cooperative.poll.user.entity.RoleEntity;
 import com.otta.cooperative.poll.user.entity.UserEntity;
 import com.otta.cooperative.poll.user.map.UserEntityMapper;
 import com.otta.cooperative.poll.user.map.UserOutputMapper;
 import com.otta.cooperative.poll.user.model.UserInput;
 import com.otta.cooperative.poll.user.model.UserOutput;
+import com.otta.cooperative.poll.user.repository.RoleRepository;
 import com.otta.cooperative.poll.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
     private static final String SAVED_DOCUMENT = "100";
     private static final String UNKNOWN_DOCUMENT = "150";
+    private static final String ROLE_NAME = "USER";
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private RoleRepository roleRepository;
     @Mock
     private UserEntityMapper userEntityMapper;
     @Mock
@@ -42,11 +48,14 @@ public class UserServiceTest {
     private UserEntity savedUserEntity;
     @Mock
     private UserOutput userOutput;
+    @Mock
+    private Set<RoleEntity> roles;
 
     @Test
     public void shouldCorrectlySaveUserData() {
         // given
-        given(userEntityMapper.map(userInput)).willReturn(userEntity);
+        given(roleRepository.findAllByName(ROLE_NAME)).willReturn(roles);
+        given(userEntityMapper.map(userInput, roles)).willReturn(userEntity);
         given(userRepository.save(userEntity)).willReturn(savedUserEntity);
         given(userOutputMapper.map(savedUserEntity)).willReturn(userOutput);
         // when
