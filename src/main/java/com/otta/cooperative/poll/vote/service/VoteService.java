@@ -11,6 +11,8 @@ import com.otta.cooperative.poll.user.converter.UserEntityLoggedConverter;
 import com.otta.cooperative.poll.user.entity.UserEntity;
 import com.otta.cooperative.poll.vote.entity.VoteEntity;
 import com.otta.cooperative.poll.vote.entity.VoteOptionEntity;
+import com.otta.cooperative.poll.vote.mapper.VoteEntityMapper;
+import com.otta.cooperative.poll.vote.mapper.VoteOutputMapper;
 import com.otta.cooperative.poll.vote.model.VoteInput;
 import com.otta.cooperative.poll.vote.model.VoteOutput;
 import com.otta.cooperative.poll.vote.repository.VoteOptionRepository;
@@ -24,15 +26,20 @@ public class VoteService {
     private final PollRepository pollRepository;
     private final PollOpenValidator pollOpenValidation;
     private final UserEntityLoggedConverter userEntityLoggedConverter;
+    private final VoteOutputMapper voteOutputMapper;
+    private final VoteEntityMapper voteEntityMapper;
 
     public VoteService(VoteRepository voteRepository, VoteOptionRepository voteOptionRepository,
             PollRepository pollRepository, PollOpenValidator pollOpenValidation,
-            UserEntityLoggedConverter userEntityLoggedConverter) {
+            UserEntityLoggedConverter userEntityLoggedConverter, VoteOutputMapper voteOutputMapper,
+            VoteEntityMapper voteEntityMapper) {
         this.voteRepository = voteRepository;
         this.voteOptionRepository = voteOptionRepository;
         this.pollRepository = pollRepository;
         this.pollOpenValidation = pollOpenValidation;
         this.userEntityLoggedConverter = userEntityLoggedConverter;
+        this.voteOutputMapper = voteOutputMapper;
+        this.voteEntityMapper = voteEntityMapper;
     }
 
     public VoteOutput saveVote(VoteInput input) {
@@ -44,20 +51,15 @@ public class VoteService {
         if (optionalVoteOptionEntity.isPresent() && optionalUserEntity.isPresent() && optionalPollEntity.isPresent()) {
 
             if (pollOpenValidation.validate(optionalPollEntity.get(), dateTimeToProcessVote)) {
-                VoteEntity voteEntity = new VoteEntity();
-                voteEntity.setPollEntity(optionalPollEntity.get());
-                voteEntity.setUserEntity(optionalUserEntity.get());
-                voteEntity.setVoteOptionEntity(optionalVoteOptionEntity.get());
+                VoteEntity voteEntity = voteEntityMapper.map(optionalPollEntity.get(),
+                        optionalUserEntity.get(),
+                        optionalVoteOptionEntity.get());
 
                 voteEntity = voteRepository.save(voteEntity);
-                return map(voteEntity);
+                return voteOutputMapper.map(voteEntity);
             }
             throw new IllegalArgumentException("Could not process vote for this poll. Session is already over.");
         }
         throw new IllegalArgumentException("Could not find minimal information to vote.");
-    }
-
-    private VoteOutput map(VoteEntity entity) {
-        return new VoteOutput(entity.getId(), entity.getVoteOptionEntity().getId(), entity.getVoteOptionEntity().getLabel());
     }
 }
