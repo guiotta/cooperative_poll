@@ -39,16 +39,26 @@ public class UserEntityLoggedConverterTest {
         when(converter.getSecurityContext()).thenReturn(context);
         when(context.getAuthentication()).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(DOCUMENT);
-        when(userRepository.findByDocument(DOCUMENT)).thenReturn(Optional.of(userEntity));
+        
     }
 
     @Test
     public void shouldCorrectlyConvertUserInContextToUserEntity() {
         // given
+        when(userRepository.findByDocument(DOCUMENT)).thenReturn(Optional.of(userEntity));
         // when
         Optional<UserEntity> actualValue = converter.convert();
         // then
         assertEquals(userEntity, actualValue.get());
     }
 
+    @Test
+    public void shouldReturnOptionalEmptyWhenRepositoryCouldNotFindUserEntityForDocument() {
+     // given
+        when(userRepository.findByDocument(DOCUMENT)).thenReturn(Optional.empty());
+        // when
+        Optional<UserEntity> actualValue = converter.convert();
+        // then
+        assertEquals(Optional.empty(), actualValue);
+    }
 }
