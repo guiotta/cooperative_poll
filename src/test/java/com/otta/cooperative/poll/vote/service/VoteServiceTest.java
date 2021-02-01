@@ -1,12 +1,16 @@
 package com.otta.cooperative.poll.vote.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
 
+import org.assertj.core.util.Lists;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,9 +25,11 @@ import com.otta.cooperative.poll.user.entity.UserEntity;
 import com.otta.cooperative.poll.vote.entity.VoteEntity;
 import com.otta.cooperative.poll.vote.entity.VoteOptionEntity;
 import com.otta.cooperative.poll.vote.mapper.VoteEntityMapper;
+import com.otta.cooperative.poll.vote.mapper.VoteOptionOutputMapper;
 import com.otta.cooperative.poll.vote.mapper.VoteOutputMapper;
 import com.otta.cooperative.poll.vote.model.VoteInput;
 import com.otta.cooperative.poll.vote.model.VoteOutput;
+import com.otta.cooperative.poll.vote.model.option.VoteOptionOutput;
 import com.otta.cooperative.poll.vote.repository.VoteOptionRepository;
 import com.otta.cooperative.poll.vote.repository.VoteRepository;
 import com.otta.cooperative.poll.vote.validation.PollOpenValidator;
@@ -49,6 +55,8 @@ public class VoteServiceTest {
     private VoteOutputMapper voteOutputMapper;
     @Mock
     private VoteEntityMapper voteEntityMapper;
+    @Mock
+    private VoteOptionOutputMapper voteOptionOutputMapper;
 
     @Mock
     private VoteInput voteInput;
@@ -64,23 +72,24 @@ public class VoteServiceTest {
     private VoteEntity voteEntitySaved;
     @Mock
     private VoteOutput voteOutput;
+    @Mock
+    private VoteOptionOutput voteOptionOutput;
 
     private LocalDateTime now;
 
     @BeforeEach
     protected void setUp() {
         voteService = spy(new VoteService(voteRepository, voteOptionRepository, pollRepository, pollOpenValidation,
-                userEntityLoggedConverter, voteOutputMapper, voteEntityMapper));
+                userEntityLoggedConverter, voteOutputMapper, voteEntityMapper, voteOptionOutputMapper));
         now = LocalDateTime.now();
-
-        when(voteService.getLocalDateTimeNow()).thenReturn(now);
-        when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
-        when(voteInput.getPollId()).thenReturn(POLL_ID);
     }
 
     @Test
     public void shouldCorrectlySaveVote() {
         // given
+        when(voteService.getLocalDateTimeNow()).thenReturn(now);
+        when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
+        when(voteInput.getPollId()).thenReturn(POLL_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
         when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
@@ -97,6 +106,9 @@ public class VoteServiceTest {
     @Test
     public void shouldThrowExceptionWhenPollIsClosed() {
         // given
+        when(voteService.getLocalDateTimeNow()).thenReturn(now);
+        when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
+        when(voteInput.getPollId()).thenReturn(POLL_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
         when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
@@ -111,6 +123,9 @@ public class VoteServiceTest {
     @Test
     public void shouldThrowExceptionWhenOptionalVoteOptionEntityIsEmpty() {
         // given
+        when(voteService.getLocalDateTimeNow()).thenReturn(now);
+        when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
+        when(voteInput.getPollId()).thenReturn(POLL_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.empty());
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
         when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
@@ -124,6 +139,9 @@ public class VoteServiceTest {
     @Test
     public void shouldThrowExceptionWhenOptionalUserEntityIsEmpty() {
         // given
+        when(voteService.getLocalDateTimeNow()).thenReturn(now);
+        when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
+        when(voteInput.getPollId()).thenReturn(POLL_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.empty());
         when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
@@ -137,6 +155,9 @@ public class VoteServiceTest {
     @Test
     public void shouldThrowExceptionWhenOptionalPollEntityIsEmpty() {
         // given
+        when(voteService.getLocalDateTimeNow()).thenReturn(now);
+        when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
+        when(voteInput.getPollId()).thenReturn(POLL_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
         when(pollRepository.findById(POLL_ID)).thenReturn(Optional.empty());
@@ -145,5 +166,16 @@ public class VoteServiceTest {
             voteService.saveVote(voteInput);
         });
         // then
+    }
+
+    @Test
+    public void shouldCorrectlyListAllVoteOptions() {
+        // given
+        when(voteOptionRepository.findAll()).thenReturn(Lists.list(voteOptionEntity));
+        when(voteOptionOutputMapper.map(voteOptionEntity)).thenReturn(voteOptionOutput);
+        // when
+        Collection<VoteOptionOutput> actualValue = voteService.listVoteOptions();
+        // then
+        assertThat(actualValue, Matchers.containsInAnyOrder(voteOptionOutput));
     }
 }

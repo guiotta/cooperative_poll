@@ -1,7 +1,9 @@
 package com.otta.cooperative.poll.vote.service;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,11 @@ import com.otta.cooperative.poll.user.entity.UserEntity;
 import com.otta.cooperative.poll.vote.entity.VoteEntity;
 import com.otta.cooperative.poll.vote.entity.VoteOptionEntity;
 import com.otta.cooperative.poll.vote.mapper.VoteEntityMapper;
+import com.otta.cooperative.poll.vote.mapper.VoteOptionOutputMapper;
 import com.otta.cooperative.poll.vote.mapper.VoteOutputMapper;
 import com.otta.cooperative.poll.vote.model.VoteInput;
 import com.otta.cooperative.poll.vote.model.VoteOutput;
+import com.otta.cooperative.poll.vote.model.option.VoteOptionOutput;
 import com.otta.cooperative.poll.vote.repository.VoteOptionRepository;
 import com.otta.cooperative.poll.vote.repository.VoteRepository;
 import com.otta.cooperative.poll.vote.validation.PollOpenValidator;
@@ -28,11 +32,12 @@ public class VoteService {
     private final UserEntityLoggedConverter userEntityLoggedConverter;
     private final VoteOutputMapper voteOutputMapper;
     private final VoteEntityMapper voteEntityMapper;
+    private final VoteOptionOutputMapper voteOptionOutputMapper;
 
     public VoteService(VoteRepository voteRepository, VoteOptionRepository voteOptionRepository,
             PollRepository pollRepository, PollOpenValidator pollOpenValidation,
             UserEntityLoggedConverter userEntityLoggedConverter, VoteOutputMapper voteOutputMapper,
-            VoteEntityMapper voteEntityMapper) {
+            VoteEntityMapper voteEntityMapper, VoteOptionOutputMapper voteOptionOutputMapper) {
         this.voteRepository = voteRepository;
         this.voteOptionRepository = voteOptionRepository;
         this.pollRepository = pollRepository;
@@ -40,6 +45,7 @@ public class VoteService {
         this.userEntityLoggedConverter = userEntityLoggedConverter;
         this.voteOutputMapper = voteOutputMapper;
         this.voteEntityMapper = voteEntityMapper;
+        this.voteOptionOutputMapper = voteOptionOutputMapper;
     }
 
     public VoteOutput saveVote(VoteInput input) {
@@ -61,6 +67,12 @@ public class VoteService {
             throw new IllegalArgumentException("Could not process vote for this poll. Session is already over.");
         }
         throw new IllegalArgumentException("Could not find minimal information to vote.");
+    }
+
+    public Collection<VoteOptionOutput> listVoteOptions() {
+        Collection<VoteOptionEntity> voteOptions = voteOptionRepository.findAll();
+
+        return voteOptions.stream().map(option -> voteOptionOutputMapper.map(option)).collect(Collectors.toList());
     }
 
     protected LocalDateTime getLocalDateTimeNow() {
