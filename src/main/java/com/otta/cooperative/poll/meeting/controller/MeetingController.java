@@ -18,6 +18,7 @@ import com.otta.cooperative.poll.meeting.model.MeetingInput;
 import com.otta.cooperative.poll.meeting.model.MeetingOutput;
 import com.otta.cooperative.poll.meeting.model.poll.PollInput;
 import com.otta.cooperative.poll.meeting.model.poll.PollOutput;
+import com.otta.cooperative.poll.meeting.model.result.ResultOutput;
 import com.otta.cooperative.poll.meeting.service.MeetingService;
 
 @RestController
@@ -46,8 +47,7 @@ public class MeetingController {
     }
 
     @GetMapping(value = "/result", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> pollResult() {
-        meetingService.generateResult(1l);
-        return ResponseEntity.ok("retorno");
+    public ResponseEntity<ResultOutput> pollResult() {
+        return ResponseEntity.ok(meetingService.generateResult(1l));
     }
 }

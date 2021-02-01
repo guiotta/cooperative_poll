@@ -4,19 +4,26 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ResultOutput {
+    @JsonProperty("meeting")
     private Long meetingId;
-    private Boolean closed;
+    @JsonProperty("open")
+    private Boolean open;
+    @JsonProperty("close_date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime closeDate;
+    @JsonProperty("votes")
     private Collection<VoteOptionResultOutput> votes;
 
-    public ResultOutput() {
-    }
+    public ResultOutput() { }
 
-    public ResultOutput(Long meetingId, Boolean closed, LocalDateTime closeDate,
+    public ResultOutput(Long meetingId, Boolean open, LocalDateTime closeDate,
             Collection<VoteOptionResultOutput> votes) {
         this.meetingId = meetingId;
-        this.closed = closed;
+        this.open = open;
         this.closeDate = closeDate;
         this.votes = votes;
     }
@@ -29,12 +36,12 @@ public class ResultOutput {
         this.meetingId = meetingId;
     }
 
-    public Boolean getClosed() {
-        return closed;
+    public Boolean getOpen() {
+        return open;
     }
 
-    public void setClosed(Boolean closed) {
-        this.closed = closed;
+    public void setOpen(Boolean open) {
+        this.open = open;
     }
 
     public LocalDateTime getCloseDate() {
@@ -55,7 +62,7 @@ public class ResultOutput {
 
     @Override
     public int hashCode() {
-        return Objects.hash(closeDate, closed, meetingId, votes);
+        return Objects.hash(closeDate, open, meetingId, votes);
     }
 
     @Override
@@ -67,7 +74,7 @@ public class ResultOutput {
             return false;
         }
         ResultOutput other = (ResultOutput) obj;
-        return Objects.equals(closeDate, other.closeDate) && Objects.equals(closed, other.closed)
+        return Objects.equals(closeDate, other.closeDate) && Objects.equals(open, other.open)
                 && Objects.equals(meetingId, other.meetingId) && Objects.equals(votes, other.votes);
     }
 
@@ -77,7 +84,7 @@ public class ResultOutput {
         builder.append("ResultOutput [meetingId=");
         builder.append(meetingId);
         builder.append(", closed=");
-        builder.append(closed);
+        builder.append(open);
         builder.append(", closeDate=");
         builder.append(closeDate);
         builder.append(", votes=");
