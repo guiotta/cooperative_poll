@@ -73,26 +73,25 @@ public class MeetingService {
     }
 
     public PollOutput savePoll(PollInput input) throws SchedulerException {
+        LOGGER.info("Saving a Poll to a Meeting with ID {}.", input.getMeetingId());
+
         Optional<MeetingEntity> optionalMeeting = meetingRepository.findById(input.getMeetingId());
+        Optional<PollEntity> optionalPollEntity = pollEntityExtractor.extract(optionalMeeting);
 
-        if (optionalMeeting.isPresent()) {
+        if (optionalPollEntity.isEmpty()) {
             MeetingEntity meetingEntity = optionalMeeting.get();
+            LOGGER.info("Adding a Poll to Meeting with Id {}.", meetingEntity.getId());
 
-            if (meetingEntity.getPoll() == null) {
-                LOGGER.info("Adding a Poll to Meeting with Id {}.", meetingEntity.getId());
+            PollEntity pollEntity = pollEntityMapper.map(input, meetingEntity);
+            meetingEntity.setPoll(pollEntity);
+            meetingEntity = meetingRepository.save(meetingEntity);
 
-                PollEntity pollEntity = pollEntityMapper.map(input, meetingEntity);
-                meetingEntity.setPoll(pollEntity);
-                meetingEntity = meetingRepository.save(meetingEntity);
+            pollEndJobScheduler.scheduleJob(pollEntity.getClose(), pollEntity.getId());
 
-                pollEndJobScheduler.scheduleJob(pollEntity.getClose(), pollEntity.getId());
-
-                return pollOutputMapper.map(meetingEntity.getPoll());
-            }
-            LOGGER.debug("Meeting with Id {} already has a poll. Poll Id {}.", meetingEntity.getId(), meetingEntity.getPoll().getId());
-            throw new IllegalStateException(String.format("Meeting already has a Poll associated."));
+            return pollOutputMapper.map(meetingEntity.getPoll());
         }
-        LOGGER.debug("Could not find any Meeting with id {}.", input.getMeetingId());
+
+        LOGGER.debug("Could not save a poll to MeetingEntity {}.", optionalMeeting);
         throw new IllegalArgumentException(String.format("Could not find a Meeting to add a Poll."));
     }
 
@@ -103,6 +102,7 @@ public class MeetingService {
 
         if (optionalPollEntity.isPresent()) {
             PollEntity pollEntity = optionalPollEntity.get();
+            LOGGER.debug("Generating result for Poll {}.", pollEntity);
 
             return resultOutputMapper.map(meetingId, pollEntity, voteOptions);
         }
