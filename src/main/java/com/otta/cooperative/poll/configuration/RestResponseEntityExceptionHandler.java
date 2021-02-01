@@ -1,9 +1,9 @@
 package com.otta.cooperative.poll.configuration;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import org.h2.jdbc.JdbcSQLIntegrityConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import com.otta.cooperative.poll.exception.model.ExceptionOutput;
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestResponseEntityExceptionHandler.class);
 
-    @ExceptionHandler(value = JdbcSQLIntegrityConstraintViolationException.class)
+    @ExceptionHandler(value = SQLIntegrityConstraintViolationException.class)
     protected ResponseEntity<ExceptionOutput> handleSQLIntegrityConstraintViolationException(RuntimeException ex, WebRequest request) {
         LOGGER.error("An Error was ocorried processing a SQL Statement.", ex);
 
@@ -36,9 +36,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     protected ResponseEntity<ExceptionOutput> handleIllegalArgumentException(RuntimeException ex, WebRequest request) {
         LOGGER.error("An Error was ocorried processing a HTTP Request.", ex);
 
-        final String errorMessage = "Some argument sent to Server was not expected.";
         final ExceptionOutput body = new ExceptionOutput(LocalDateTime.now(), HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                errorMessage, Arrays.toString(ex.getStackTrace()),
+                ex.getMessage(), Arrays.toString(ex.getStackTrace()),
                 ((ServletWebRequest) request).getRequest().getRequestURI().toString());
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);

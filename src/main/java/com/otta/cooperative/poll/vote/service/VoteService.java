@@ -43,7 +43,7 @@ public class VoteService {
     }
 
     public VoteOutput saveVote(VoteInput input) {
-        LocalDateTime dateTimeToProcessVote = LocalDateTime.now();
+        LocalDateTime dateTimeToProcessVote = this.getLocalDateTimeNow();
         Optional<VoteOptionEntity> optionalVoteOptionEntity = voteOptionRepository.findById(input.getVoteOptionId());
         Optional<UserEntity> optionalUserEntity = userEntityLoggedConverter.convert();
         Optional<PollEntity> optionalPollEntity = pollRepository.findById(input.getPollId());
@@ -61,5 +61,9 @@ public class VoteService {
             throw new IllegalArgumentException("Could not process vote for this poll. Session is already over.");
         }
         throw new IllegalArgumentException("Could not find minimal information to vote.");
+    }
+
+    protected LocalDateTime getLocalDateTimeNow() {
+        return LocalDateTime.now();
     }
 }
