@@ -22,7 +22,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler(value = JdbcSQLIntegrityConstraintViolationException.class)
     protected ResponseEntity<ExceptionOutput> handleSQLIntegrityConstraintViolationException(RuntimeException ex, WebRequest request) {
-        LOGGER.error("An Error was ocorried processing an SQL Statement.", ex);
+        LOGGER.error("An Error was ocorried processing a SQL Statement.", ex);
 
         final String errorMessage = "Could not execute an SQL Statement on database. Check data sent do Server.";
         final ExceptionOutput body = new ExceptionOutput(LocalDateTime.now(), HttpStatus.CONFLICT.value(),
@@ -30,5 +30,17 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
                 ((ServletWebRequest) request).getRequest().getRequestURI().toString());
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    protected ResponseEntity<ExceptionOutput> handleIllegalArgumentException(RuntimeException ex, WebRequest request) {
+        LOGGER.error("An Error was ocorried processing a HTTP Request.", ex);
+
+        final String errorMessage = "Some argument sent to Server was not expected.";
+        final ExceptionOutput body = new ExceptionOutput(LocalDateTime.now(), HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                errorMessage, Arrays.toString(ex.getStackTrace()),
+                ((ServletWebRequest) request).getRequest().getRequestURI().toString());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
     }
 }
