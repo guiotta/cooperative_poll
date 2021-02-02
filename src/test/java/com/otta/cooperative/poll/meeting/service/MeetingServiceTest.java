@@ -2,7 +2,9 @@ package com.otta.cooperative.poll.meeting.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDateTime;
@@ -42,6 +44,10 @@ import com.otta.cooperative.poll.vote.repository.VoteOptionRepository;
 public class MeetingServiceTest {
     private static final Long MEETING_ID = 10l;
     private static final Long POLL_ID = 20l;
+    private static final String ALL = "all";
+    private static final String OPEN = "open";
+    private static final String UNKNOWN = "unknown";
+
     @InjectMocks
     private MeetingService meetingService;
 
@@ -108,9 +114,31 @@ public class MeetingServiceTest {
         given(meetingRepository.findAll()).willReturn(Lists.list(meetingEntity));
         given(meetingOutputMapper.map(meetingEntity)).willReturn(meetingOutput);
         // when
-        Collection<MeetingOutput> actualValue = meetingService.findAll();
+        Collection<MeetingOutput> actualValue = meetingService.findAll(ALL);
         // then
         assertThat(actualValue, Matchers.containsInAnyOrder(meetingOutput));
+    }
+
+    @Test
+    public void shouldCorrectlyFindOnlyeMeetingsWithOpenPoll() {
+        // given
+        given(meetingRepository.findByPollCloseAfterNow()).willReturn(Lists.list(meetingEntity));
+        given(meetingOutputMapper.map(meetingEntity)).willReturn(meetingOutput);
+        // when
+        Collection<MeetingOutput> actualValue = meetingService.findAll(OPEN);
+        // then
+        assertThat(actualValue, Matchers.containsInAnyOrder(meetingOutput));
+    }
+
+    @Test
+    public void shouldNotExecuteRepositoryWhenSerachTypeIsUnknown() {
+        // given
+        // when
+        Collection<MeetingOutput> actualValue = meetingService.findAll(UNKNOWN);
+        // then
+        assertTrue(actualValue.isEmpty());
+        verify(meetingRepository, never()).findAll();
+        verify(meetingRepository, never()).findByPollCloseAfterNow();
     }
 
     @Test

@@ -54,8 +54,8 @@ public class MeetingController {
                 content = { @Content(mediaType = "application/json", array =  @ArraySchema(schema = @Schema(implementation = MeetingOutput.class))) })
     })
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<MeetingOutput>> findAll() {
-        return ResponseEntity.ok(meetingService.findAll());
+    public ResponseEntity<Collection<MeetingOutput>> findAll(@RequestParam(name = "type", defaultValue = "all") String searchType) {
+        return ResponseEntity.ok(meetingService.findAll(searchType));
     }
 
     @Operation(summary = "Add a Poll in system, associated with a Meeting.")

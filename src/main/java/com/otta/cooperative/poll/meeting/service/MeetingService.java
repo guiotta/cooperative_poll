@@ -1,5 +1,6 @@
 package com.otta.cooperative.poll.meeting.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import com.otta.cooperative.poll.meeting.mapper.PollEntityMapper;
 import com.otta.cooperative.poll.meeting.mapper.PollOutputMapper;
 import com.otta.cooperative.poll.meeting.model.MeetingInput;
 import com.otta.cooperative.poll.meeting.model.MeetingOutput;
+import com.otta.cooperative.poll.meeting.model.SearchType;
 import com.otta.cooperative.poll.meeting.model.poll.PollInput;
 import com.otta.cooperative.poll.meeting.model.poll.PollOutput;
 import com.otta.cooperative.poll.meeting.model.result.ResultOutput;
@@ -64,8 +66,11 @@ public class MeetingService {
         return meetingOutputMapper.map(entity);
     }
 
-    public Collection<MeetingOutput> findAll() {
-        Collection<MeetingEntity> entities = meetingRepository.findAll();
+    public Collection<MeetingOutput> findAll(String searchType) {
+        SearchType type = SearchType.getEnum(searchType);
+        LOGGER.debug("String {} converted to SearchType {}.", searchType, type);
+        Collection<MeetingEntity> entities = type == SearchType.ALL ? meetingRepository.findAll()
+                : type == SearchType.OPEN ? meetingRepository.findByPollCloseAfterNow() : new ArrayList<>() ;
 
         return entities.stream()
                 .map(entity -> meetingOutputMapper.map(entity))
