@@ -27,6 +27,9 @@ public class PollEndJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
+        // TODO: Adicionar lógica de mensageria neste ponto.
+        // Esta classe foi criada com a intenção de ser o melhor ponto para enviar mensagens contendo a informação do
+        // final de uma votação e do resultado dela.
         Optional<Long> optionalPollId = pollIdQuartzContextoExtractor.extract(context);
 
         if (optionalPollId.isPresent()) {
