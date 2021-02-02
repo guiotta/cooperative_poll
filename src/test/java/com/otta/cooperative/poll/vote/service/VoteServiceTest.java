@@ -22,6 +22,8 @@ import com.otta.cooperative.poll.meeting.entity.PollEntity;
 import com.otta.cooperative.poll.meeting.repository.PollRepository;
 import com.otta.cooperative.poll.user.converter.UserEntityLoggedConverter;
 import com.otta.cooperative.poll.user.entity.UserEntity;
+import com.otta.cooperative.poll.vote.client.model.StatusResource;
+import com.otta.cooperative.poll.vote.client.rest.StatusClient;
 import com.otta.cooperative.poll.vote.entity.VoteEntity;
 import com.otta.cooperative.poll.vote.entity.VoteOptionEntity;
 import com.otta.cooperative.poll.vote.mapper.VoteEntityMapper;
@@ -38,6 +40,9 @@ import com.otta.cooperative.poll.vote.validation.PollOpenValidator;
 public class VoteServiceTest {
     private static final Long VOTE_OPTION_ID = 10l;
     private static final Long POLL_ID = 20l;
+    private static final String DOCUMENT = "document";
+    private static final String ABLE_TO_VOTE = "ABLE_TO_VOTE";
+    private static final String UNABLE_TO_VOTE = "UNABLE_TO_VOTE";
 
     private VoteService voteService;
 
@@ -57,6 +62,8 @@ public class VoteServiceTest {
     private VoteEntityMapper voteEntityMapper;
     @Mock
     private VoteOptionOutputMapper voteOptionOutputMapper;
+    @Mock
+    private StatusClient statusClient;
 
     @Mock
     private VoteInput voteInput;
@@ -74,13 +81,15 @@ public class VoteServiceTest {
     private VoteOutput voteOutput;
     @Mock
     private VoteOptionOutput voteOptionOutput;
+    @Mock
+    private StatusResource statusResource;
 
     private LocalDateTime now;
 
     @BeforeEach
     protected void setUp() {
         voteService = spy(new VoteService(voteRepository, voteOptionRepository, pollRepository, pollOpenValidation,
-                userEntityLoggedConverter, voteOutputMapper, voteEntityMapper, voteOptionOutputMapper));
+                userEntityLoggedConverter, voteOutputMapper, voteEntityMapper, voteOptionOutputMapper, statusClient));
         now = LocalDateTime.now();
     }
 
@@ -94,6 +103,9 @@ public class VoteServiceTest {
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
         when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
         when(pollOpenValidation.validate(pollEntity, now)).thenReturn(Boolean.TRUE);
+        when(userEntity.getDocument()).thenReturn(DOCUMENT);
+        when(statusClient.findByDocument(DOCUMENT)).thenReturn(statusResource);
+        when(statusResource.getStatus()).thenReturn(ABLE_TO_VOTE);
         when(voteEntityMapper.map(pollEntity, userEntity, voteOptionEntity)).thenReturn(voteEntity);
         when(voteRepository.save(voteEntity)).thenReturn(voteEntitySaved);
         when(voteOutputMapper.map(voteEntitySaved)).thenReturn(voteOutput);
@@ -161,6 +173,26 @@ public class VoteServiceTest {
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
         when(pollRepository.findById(POLL_ID)).thenReturn(Optional.empty());
+        // when
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            voteService.saveVote(voteInput);
+        });
+        // then
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUserDocumentIsNotAbleToVote() {
+        // given
+        when(voteService.getLocalDateTimeNow()).thenReturn(now);
+        when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
+        when(voteInput.getPollId()).thenReturn(POLL_ID);
+        when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
+        when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
+        when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
+        when(pollOpenValidation.validate(pollEntity, now)).thenReturn(Boolean.TRUE);
+        when(userEntity.getDocument()).thenReturn(DOCUMENT);
+        when(statusClient.findByDocument(DOCUMENT)).thenReturn(statusResource);
+        when(statusResource.getStatus()).thenReturn(UNABLE_TO_VOTE);
         // when
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             voteService.saveVote(voteInput);

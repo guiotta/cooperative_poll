@@ -11,6 +11,9 @@ import com.otta.cooperative.poll.meeting.entity.PollEntity;
 import com.otta.cooperative.poll.meeting.repository.PollRepository;
 import com.otta.cooperative.poll.user.converter.UserEntityLoggedConverter;
 import com.otta.cooperative.poll.user.entity.UserEntity;
+import com.otta.cooperative.poll.vote.client.model.Status;
+import com.otta.cooperative.poll.vote.client.model.StatusResource;
+import com.otta.cooperative.poll.vote.client.rest.StatusClient;
 import com.otta.cooperative.poll.vote.entity.VoteEntity;
 import com.otta.cooperative.poll.vote.entity.VoteOptionEntity;
 import com.otta.cooperative.poll.vote.mapper.VoteEntityMapper;
@@ -33,11 +36,13 @@ public class VoteService {
     private final VoteOutputMapper voteOutputMapper;
     private final VoteEntityMapper voteEntityMapper;
     private final VoteOptionOutputMapper voteOptionOutputMapper;
+    private final StatusClient statusClient;
 
     public VoteService(VoteRepository voteRepository, VoteOptionRepository voteOptionRepository,
             PollRepository pollRepository, PollOpenValidator pollOpenValidation,
             UserEntityLoggedConverter userEntityLoggedConverter, VoteOutputMapper voteOutputMapper,
-            VoteEntityMapper voteEntityMapper, VoteOptionOutputMapper voteOptionOutputMapper) {
+            VoteEntityMapper voteEntityMapper, VoteOptionOutputMapper voteOptionOutputMapper,
+            StatusClient statusClient) {
         this.voteRepository = voteRepository;
         this.voteOptionRepository = voteOptionRepository;
         this.pollRepository = pollRepository;
@@ -46,6 +51,7 @@ public class VoteService {
         this.voteOutputMapper = voteOutputMapper;
         this.voteEntityMapper = voteEntityMapper;
         this.voteOptionOutputMapper = voteOptionOutputMapper;
+        this.statusClient = statusClient;
     }
 
     public VoteOutput saveVote(VoteInput input) {
@@ -57,12 +63,18 @@ public class VoteService {
         if (optionalVoteOptionEntity.isPresent() && optionalUserEntity.isPresent() && optionalPollEntity.isPresent()) {
 
             if (pollOpenValidation.validate(optionalPollEntity.get(), dateTimeToProcessVote)) {
-                VoteEntity voteEntity = voteEntityMapper.map(optionalPollEntity.get(),
-                        optionalUserEntity.get(),
-                        optionalVoteOptionEntity.get());
+                UserEntity userEntity = optionalUserEntity.get();
+                Boolean isValidDocument = this.isValidDocument(userEntity.getDocument());
 
-                voteEntity = voteRepository.save(voteEntity);
-                return voteOutputMapper.map(voteEntity);
+                if (isValidDocument) {
+                    VoteEntity voteEntity = voteEntityMapper.map(optionalPollEntity.get(),
+                            userEntity,
+                            optionalVoteOptionEntity.get());
+
+                    voteEntity = voteRepository.save(voteEntity);
+                    return voteOutputMapper.map(voteEntity);
+                }
+                throw new IllegalArgumentException("User document is not allowed to vote.");
             }
             throw new IllegalArgumentException("Could not process vote for this poll. Session is already over.");
         }
@@ -73,6 +85,12 @@ public class VoteService {
         Collection<VoteOptionEntity> voteOptions = voteOptionRepository.findAll();
 
         return voteOptions.stream().map(option -> voteOptionOutputMapper.map(option)).collect(Collectors.toList());
+    }
+
+    private Boolean isValidDocument(String document) {
+        StatusResource resource = statusClient.findByDocument(document);
+        String status = resource.getStatus();
+        return Status.ABLE_TO_VOTE.getValue().equals(status);
     }
 
     protected LocalDateTime getLocalDateTimeNow() {

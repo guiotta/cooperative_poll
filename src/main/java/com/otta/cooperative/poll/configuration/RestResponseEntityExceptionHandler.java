@@ -16,6 +16,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.otta.cooperative.poll.exception.model.ExceptionOutput;
 
+import feign.FeignException;
+
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestResponseEntityExceptionHandler.class);
@@ -38,6 +40,18 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
         final ExceptionOutput body = new ExceptionOutput(LocalDateTime.now(), HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 ex.getMessage(), Arrays.toString(ex.getStackTrace()),
+                ((ServletWebRequest) request).getRequest().getRequestURI().toString());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
+    }
+
+    @ExceptionHandler(value = FeignException.NotFound.class)
+    protected ResponseEntity<ExceptionOutput> handleFeignExceptionNotFound(RuntimeException ex, WebRequest request) {
+        LOGGER.error("Could not process HTTP Request for a external URL.", ex);
+
+        final String errorMessage = "Document for User is not valid.";
+        final ExceptionOutput body = new ExceptionOutput(LocalDateTime.now(), HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                errorMessage, Arrays.toString(ex.getStackTrace()),
                 ((ServletWebRequest) request).getRequest().getRequestURI().toString());
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(body);
