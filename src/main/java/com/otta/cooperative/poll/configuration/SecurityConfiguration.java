@@ -64,8 +64,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.httpBasic().and()
                 // Não cheque essas requisições
                 .authorizeRequests()
-                .antMatchers("/api/v1/authentication", "/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
-                        "/configuration/**", "/swagger-ui.html", "/webjars/**", "/h2-console/**", "/console/**")
+                .antMatchers("/v3/api-docs/**", "/configuration/ui", "/swagger-resources/**",
+                        "/swagger-ui.html", "/swagger-ui/**", "/webjars/**", "/h2-console/**", "/console/**")
                 .permitAll()
                 .antMatchers("/api/v1/user/**", "/api/v1/meeting/**", "/api/v1/vote/option/**")
                 .permitAll()
