@@ -18,8 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.otta.cooperative.poll.meeting.entity.MeetingEntity;
 import com.otta.cooperative.poll.meeting.entity.PollEntity;
-import com.otta.cooperative.poll.meeting.repository.PollRepository;
+import com.otta.cooperative.poll.meeting.extractor.PollEntityExtractor;
+import com.otta.cooperative.poll.meeting.repository.MeetingRepository;
 import com.otta.cooperative.poll.user.converter.UserEntityLoggedConverter;
 import com.otta.cooperative.poll.user.entity.UserEntity;
 import com.otta.cooperative.poll.vote.client.model.StatusResource;
@@ -39,7 +41,7 @@ import com.otta.cooperative.poll.vote.validation.PollOpenValidator;
 @ExtendWith(MockitoExtension.class)
 public class VoteServiceTest {
     private static final Long VOTE_OPTION_ID = 10l;
-    private static final Long POLL_ID = 20l;
+    private static final Long MEETING_ID = 20l;
     private static final String DOCUMENT = "document";
     private static final String ABLE_TO_VOTE = "ABLE_TO_VOTE";
     private static final String UNABLE_TO_VOTE = "UNABLE_TO_VOTE";
@@ -50,8 +52,6 @@ public class VoteServiceTest {
     private VoteRepository voteRepository;
     @Mock
     private VoteOptionRepository voteOptionRepository;
-    @Mock
-    private PollRepository pollRepository;
     @Mock
     private PollOpenValidator pollOpenValidation;
     @Mock
@@ -64,6 +64,10 @@ public class VoteServiceTest {
     private VoteOptionOutputMapper voteOptionOutputMapper;
     @Mock
     private StatusClient statusClient;
+    @Mock
+    private MeetingRepository meetingRepository;
+    @Mock
+    private PollEntityExtractor pollEntityExtractor;
 
     @Mock
     private VoteInput voteInput;
@@ -71,6 +75,8 @@ public class VoteServiceTest {
     private VoteOptionEntity voteOptionEntity;
     @Mock
     private UserEntity userEntity;
+    @Mock
+    private MeetingEntity meetingEntity;
     @Mock
     private PollEntity pollEntity;
     @Mock
@@ -88,8 +94,9 @@ public class VoteServiceTest {
 
     @BeforeEach
     protected void setUp() {
-        voteService = spy(new VoteService(voteRepository, voteOptionRepository, pollRepository, pollOpenValidation,
-                userEntityLoggedConverter, voteOutputMapper, voteEntityMapper, voteOptionOutputMapper, statusClient));
+        voteService = spy(new VoteService(voteRepository, voteOptionRepository, meetingRepository, pollEntityExtractor,
+                pollOpenValidation, userEntityLoggedConverter, voteOutputMapper, voteEntityMapper,
+                voteOptionOutputMapper, statusClient));
         now = LocalDateTime.now();
     }
 
@@ -98,10 +105,11 @@ public class VoteServiceTest {
         // given
         when(voteService.getLocalDateTimeNow()).thenReturn(now);
         when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
-        when(voteInput.getPollId()).thenReturn(POLL_ID);
+        when(voteInput.getMeetingId()).thenReturn(MEETING_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
-        when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.of(meetingEntity));
+        when(pollEntityExtractor.extract(Optional.of(meetingEntity))).thenReturn(Optional.of(pollEntity));
         when(pollOpenValidation.validate(pollEntity, now)).thenReturn(Boolean.TRUE);
         when(userEntity.getDocument()).thenReturn(DOCUMENT);
         when(statusClient.findByDocument(DOCUMENT)).thenReturn(statusResource);
@@ -120,10 +128,11 @@ public class VoteServiceTest {
         // given
         when(voteService.getLocalDateTimeNow()).thenReturn(now);
         when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
-        when(voteInput.getPollId()).thenReturn(POLL_ID);
+        when(voteInput.getMeetingId()).thenReturn(MEETING_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
-        when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.of(meetingEntity));
+        when(pollEntityExtractor.extract(Optional.of(meetingEntity))).thenReturn(Optional.of(pollEntity));
         when(pollOpenValidation.validate(pollEntity, now)).thenReturn(Boolean.FALSE);
         // when
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -137,10 +146,11 @@ public class VoteServiceTest {
         // given
         when(voteService.getLocalDateTimeNow()).thenReturn(now);
         when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
-        when(voteInput.getPollId()).thenReturn(POLL_ID);
+        when(voteInput.getMeetingId()).thenReturn(MEETING_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.empty());
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
-        when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.of(meetingEntity));
+        when(pollEntityExtractor.extract(Optional.of(meetingEntity))).thenReturn(Optional.of(pollEntity));
         // when
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             voteService.saveVote(voteInput);
@@ -153,10 +163,27 @@ public class VoteServiceTest {
         // given
         when(voteService.getLocalDateTimeNow()).thenReturn(now);
         when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
-        when(voteInput.getPollId()).thenReturn(POLL_ID);
+        when(voteInput.getMeetingId()).thenReturn(MEETING_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.empty());
-        when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.of(meetingEntity));
+        when(pollEntityExtractor.extract(Optional.of(meetingEntity))).thenReturn(Optional.of(pollEntity));
+        // when
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            voteService.saveVote(voteInput);
+        });
+        // then
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenOptionalMeetingEntityIsEmpty() {
+        // given
+        when(voteService.getLocalDateTimeNow()).thenReturn(now);
+        when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
+        when(voteInput.getMeetingId()).thenReturn(MEETING_ID);
+        when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
+        when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.empty());
         // when
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             voteService.saveVote(voteInput);
@@ -169,10 +196,11 @@ public class VoteServiceTest {
         // given
         when(voteService.getLocalDateTimeNow()).thenReturn(now);
         when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
-        when(voteInput.getPollId()).thenReturn(POLL_ID);
+        when(voteInput.getMeetingId()).thenReturn(MEETING_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
-        when(pollRepository.findById(POLL_ID)).thenReturn(Optional.empty());
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.of(meetingEntity));
+        when(pollEntityExtractor.extract(Optional.of(meetingEntity))).thenReturn(Optional.empty());
         // when
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             voteService.saveVote(voteInput);
@@ -185,10 +213,11 @@ public class VoteServiceTest {
         // given
         when(voteService.getLocalDateTimeNow()).thenReturn(now);
         when(voteInput.getVoteOptionId()).thenReturn(VOTE_OPTION_ID);
-        when(voteInput.getPollId()).thenReturn(POLL_ID);
+        when(voteInput.getMeetingId()).thenReturn(MEETING_ID);
         when(voteOptionRepository.findById(VOTE_OPTION_ID)).thenReturn(Optional.of(voteOptionEntity));
         when(userEntityLoggedConverter.convert()).thenReturn(Optional.of(userEntity));
-        when(pollRepository.findById(POLL_ID)).thenReturn(Optional.of(pollEntity));
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.of(meetingEntity));
+        when(pollEntityExtractor.extract(Optional.of(meetingEntity))).thenReturn(Optional.of(pollEntity));
         when(pollOpenValidation.validate(pollEntity, now)).thenReturn(Boolean.TRUE);
         when(userEntity.getDocument()).thenReturn(DOCUMENT);
         when(statusClient.findByDocument(DOCUMENT)).thenReturn(statusResource);

@@ -5,10 +5,14 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.otta.cooperative.poll.meeting.entity.MeetingEntity;
 import com.otta.cooperative.poll.meeting.entity.PollEntity;
-import com.otta.cooperative.poll.meeting.repository.PollRepository;
+import com.otta.cooperative.poll.meeting.extractor.PollEntityExtractor;
+import com.otta.cooperative.poll.meeting.repository.MeetingRepository;
 import com.otta.cooperative.poll.user.converter.UserEntityLoggedConverter;
 import com.otta.cooperative.poll.user.entity.UserEntity;
 import com.otta.cooperative.poll.vote.client.model.Status;
@@ -28,9 +32,12 @@ import com.otta.cooperative.poll.vote.validation.PollOpenValidator;
 
 @Service
 public class VoteService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VoteService.class);
+
     private final VoteRepository voteRepository;
     private final VoteOptionRepository voteOptionRepository;
-    private final PollRepository pollRepository;
+    private final MeetingRepository meetingRepository;
+    private final PollEntityExtractor pollEntityExtractor;
     private final PollOpenValidator pollOpenValidation;
     private final UserEntityLoggedConverter userEntityLoggedConverter;
     private final VoteOutputMapper voteOutputMapper;
@@ -39,13 +46,14 @@ public class VoteService {
     private final StatusClient statusClient;
 
     public VoteService(VoteRepository voteRepository, VoteOptionRepository voteOptionRepository,
-            PollRepository pollRepository, PollOpenValidator pollOpenValidation,
-            UserEntityLoggedConverter userEntityLoggedConverter, VoteOutputMapper voteOutputMapper,
-            VoteEntityMapper voteEntityMapper, VoteOptionOutputMapper voteOptionOutputMapper,
-            StatusClient statusClient) {
+            MeetingRepository meetingRepository, PollEntityExtractor pollEntityExtractor,
+            PollOpenValidator pollOpenValidation, UserEntityLoggedConverter userEntityLoggedConverter,
+            VoteOutputMapper voteOutputMapper, VoteEntityMapper voteEntityMapper,
+            VoteOptionOutputMapper voteOptionOutputMapper, StatusClient statusClient) {
         this.voteRepository = voteRepository;
         this.voteOptionRepository = voteOptionRepository;
-        this.pollRepository = pollRepository;
+        this.meetingRepository = meetingRepository;
+        this.pollEntityExtractor = pollEntityExtractor;
         this.pollOpenValidation = pollOpenValidation;
         this.userEntityLoggedConverter = userEntityLoggedConverter;
         this.voteOutputMapper = voteOutputMapper;
@@ -58,7 +66,10 @@ public class VoteService {
         LocalDateTime dateTimeToProcessVote = this.getLocalDateTimeNow();
         Optional<VoteOptionEntity> optionalVoteOptionEntity = voteOptionRepository.findById(input.getVoteOptionId());
         Optional<UserEntity> optionalUserEntity = userEntityLoggedConverter.convert();
-        Optional<PollEntity> optionalPollEntity = pollRepository.findById(input.getPollId());
+        Optional<MeetingEntity> optionalMeetingEntity = meetingRepository.findById(input.getMeetingId());
+        Optional<PollEntity> optionalPollEntity = pollEntityExtractor.extract(optionalMeetingEntity);
+        LOGGER.debug("Search in database result: VoteOptionEntity {}, UserEntity {}, MeetingEntity {}.",
+                optionalVoteOptionEntity, optionalUserEntity, optionalMeetingEntity);
 
         if (optionalVoteOptionEntity.isPresent() && optionalUserEntity.isPresent() && optionalPollEntity.isPresent()) {
 

@@ -7,26 +7,26 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class VoteInput {
-    @JsonProperty("poll")
+    @JsonProperty("meeting")
     @NotNull
-    private Long pollId;
+    private Long meetingId;
     @JsonProperty("voteOption")
     @NotNull
     private Long voteOptionId;
 
     public VoteInput() { }
 
-    public VoteInput(Long pollId, Long voteOptionId) {
-        this.pollId = pollId;
+    public VoteInput(Long meetingId, Long voteOptionId) {
+        this.meetingId = meetingId;
         this.voteOptionId = voteOptionId;
     }
 
-    public Long getPollId() {
-        return pollId;
+    public Long getMeetingId() {
+        return meetingId;
     }
 
-    public void setPollId(Long pollId) {
-        this.pollId = pollId;
+    public void setMeetingId(Long pollId) {
+        this.meetingId = pollId;
     }
 
     public Long getVoteOptionId() {
@@ -39,7 +39,7 @@ public class VoteInput {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pollId, voteOptionId);
+        return Objects.hash(meetingId, voteOptionId);
     }
 
     @Override
@@ -51,14 +51,14 @@ public class VoteInput {
             return false;
         }
         VoteInput other = (VoteInput) obj;
-        return Objects.equals(pollId, other.pollId) && Objects.equals(voteOptionId, other.voteOptionId);
+        return Objects.equals(meetingId, other.meetingId) && Objects.equals(voteOptionId, other.voteOptionId);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("VoteInput [pollId=");
-        builder.append(pollId);
+        builder.append("VoteInput [meetingId=");
+        builder.append(meetingId);
         builder.append(", voteOptionId=");
         builder.append(voteOptionId);
         builder.append("]");
