@@ -17,15 +17,18 @@ public class ResultOutput {
     private LocalDateTime closeDate;
     @JsonProperty("votes")
     private Collection<VoteOptionResultOutput> votes;
+    @JsonProperty("message")
+    private String message;
 
     public ResultOutput() { }
 
-    public ResultOutput(Long meetingId, Boolean open, LocalDateTime closeDate,
-            Collection<VoteOptionResultOutput> votes) {
+    public ResultOutput(Long meetingId, Boolean open, LocalDateTime closeDate, Collection<VoteOptionResultOutput> votes,
+            String message) {
         this.meetingId = meetingId;
         this.open = open;
         this.closeDate = closeDate;
         this.votes = votes;
+        this.message = message;
     }
 
     public Long getMeetingId() {
@@ -60,9 +63,17 @@ public class ResultOutput {
         this.votes = votes;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(closeDate, open, meetingId, votes);
+        return Objects.hash(closeDate, meetingId, message, open, votes);
     }
 
     @Override
@@ -74,8 +85,9 @@ public class ResultOutput {
             return false;
         }
         ResultOutput other = (ResultOutput) obj;
-        return Objects.equals(closeDate, other.closeDate) && Objects.equals(open, other.open)
-                && Objects.equals(meetingId, other.meetingId) && Objects.equals(votes, other.votes);
+        return Objects.equals(closeDate, other.closeDate) && Objects.equals(meetingId, other.meetingId)
+                && Objects.equals(message, other.message) && Objects.equals(open, other.open)
+                && Objects.equals(votes, other.votes);
     }
 
     @Override
@@ -83,12 +95,14 @@ public class ResultOutput {
         StringBuilder builder = new StringBuilder();
         builder.append("ResultOutput [meetingId=");
         builder.append(meetingId);
-        builder.append(", closed=");
+        builder.append(", open=");
         builder.append(open);
         builder.append(", closeDate=");
         builder.append(closeDate);
         builder.append(", votes=");
         builder.append(votes);
+        builder.append(", message=");
+        builder.append(message);
         builder.append("]");
         return builder.toString();
     }
