@@ -92,7 +92,7 @@ public class MeetingService {
         }
 
         LOGGER.debug("Could not save a poll to MeetingEntity {}.", optionalMeeting);
-        throw new IllegalArgumentException(String.format("Could not find a Meeting to add a Poll."));
+        throw new IllegalArgumentException(String.format("Could not find a Meeting without a Poll with ID: {}.", input.getMeetingId()));
     }
 
     public ResultOutput generateResult(Long meetingId) {

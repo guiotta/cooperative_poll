@@ -39,7 +39,9 @@ public class UserController {
     @Operation(summary = "Add a User to system.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "User added.",
-                content = { @Content(mediaType = "aaplication/json", schema = @Schema(implementation = UserOutput.class)) })
+                content = { @Content(mediaType = "application/json", schema = @Schema(implementation = UserOutput.class)) }),
+        @ApiResponse(responseCode = "409", description = "Document sent is already in use.",
+        content = { @Content })
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserOutput> saveUser(@Valid @RequestBody UserInput input) {
@@ -50,7 +52,7 @@ public class UserController {
     @Operation(summary = "Find a User by its document.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Found the User.",
-                content = { @Content(mediaType = "aaplication/json", schema = @Schema(implementation = UserOutput.class)) }),
+                content = { @Content(mediaType = "application/json", schema = @Schema(implementation = UserOutput.class)) }),
         @ApiResponse(responseCode = "422", description = "Unknown document sent to search.",
         content = { @Content })
     })
