@@ -53,7 +53,7 @@ public class VoteController {
                 content = { @Content(mediaType = "application/json", array =  @ArraySchema(schema = @Schema(implementation = VoteOptionOutput.class))) })
     })
     @GetMapping(path = "/option", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<VoteOptionOutput>> listAllVOteOptions() {
+    public ResponseEntity<Collection<VoteOptionOutput>> listAllVoteOptions() {
         return ResponseEntity.ok(voteService.listVoteOptions());
     }
 
