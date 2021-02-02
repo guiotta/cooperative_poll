@@ -9,11 +9,20 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.otta.cooperative.poll.meeting.entity.PollEntity;
 import com.otta.cooperative.poll.meeting.repository.PollRepository;
 
+@Component
 public class PollEndJob implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(PollEndJob.class);
+
+    private final PollRepository pollRepository;
+
+    public PollEndJob(PollRepository pollRepository) {
+        this.pollRepository = pollRepository;
+    }
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -22,7 +31,7 @@ public class PollEndJob implements Job {
 
         if (optionalPollId.isPresent() && optionalRepository.isPresent()) {
             Long pollId = optionalPollId.get();
-            PollRepository pollRepository = (PollRepository) optionalRepository.get();
+            //PollRepository pollRepository = (PollRepository) optionalRepository.get();
             Optional<PollEntity> optionalEntity = pollRepository.findById(pollId);
 
             if (optionalEntity.isPresent()) {

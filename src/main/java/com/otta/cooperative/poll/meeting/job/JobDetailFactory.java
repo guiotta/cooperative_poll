@@ -9,7 +9,8 @@ public class JobDetailFactory {
 
     public JobDetail create() {
         return JobBuilder
-                .newJob(PollEndJob.class)
+                .newJob()
+                .ofType(PollEndJob.class)
                 .build();
     }
 }

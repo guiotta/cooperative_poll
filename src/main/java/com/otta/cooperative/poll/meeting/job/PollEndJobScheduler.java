@@ -7,7 +7,6 @@ import java.util.Date;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,29 +18,26 @@ import com.otta.cooperative.poll.meeting.repository.PollRepository;
 public class PollEndJobScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PollEndJobScheduler.class);
 
-    
     private final PollRepository pollRepository;
-    private final SchedulerFactory factory;
     private final JobDetailFactory jobDetailFactory;
     private final QuartzTriggerFactory quartzTriggerFactory;
+    private final Scheduler scheduler;
 
-    public PollEndJobScheduler(PollRepository pollRepository, SchedulerFactory factory,
-            JobDetailFactory jobDetailFactory, QuartzTriggerFactory quartzTriggerFactory) {
+    public PollEndJobScheduler(PollRepository pollRepository, JobDetailFactory jobDetailFactory,
+            QuartzTriggerFactory quartzTriggerFactory, Scheduler scheduler) {
         this.pollRepository = pollRepository;
-        this.factory = factory;
         this.jobDetailFactory = jobDetailFactory;
         this.quartzTriggerFactory = quartzTriggerFactory;
+        this.scheduler = scheduler;
     }
 
     public Date scheduleJob(LocalDateTime executeDateTime, Long pollId) throws SchedulerException {
         Timestamp timestamp = this.convertLocalDateTimeToTimestamp(executeDateTime);
-        Scheduler scheduler = factory.getScheduler();
-        Trigger trigger = quartzTriggerFactory.create(timestamp);
         JobDetail job = jobDetailFactory.create();
+        Trigger trigger = quartzTriggerFactory.create(timestamp, job);
 
         LOGGER.info("Scheduling PollEndJob for Poll with Id {} to execute in timestamp {}.", pollId, timestamp);
 
-        scheduler.start();
         job.getJobDataMap().put("pollId", pollId);
         job.getJobDataMap().put("pollRepository", pollRepository);
         return scheduler.scheduleJob(job, trigger);
