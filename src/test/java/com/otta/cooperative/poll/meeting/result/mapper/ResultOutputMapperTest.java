@@ -17,17 +17,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.otta.cooperative.poll.meeting.entity.PollEntity;
 import com.otta.cooperative.poll.meeting.model.result.ResultOutput;
 import com.otta.cooperative.poll.meeting.model.result.VoteOptionResultOutput;
+import com.otta.cooperative.poll.meeting.result.calculator.ResultCalculator;
 import com.otta.cooperative.poll.vote.entity.VoteOptionEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class ResultOutputMapperTest {
     private static final Long MEETING_ID = 50l;
+    private static final String MESSAGE = "message";
 
     @InjectMocks
     private ResultOutputMapper mapper;
 
     @Mock
     private VoteOptionResultOutputCollectionMapper voteOptionResultOutputCollectionMapper;
+    @Mock
+    private ResultCalculator resultCalculator;
 
     @Mock
     private Collection<VoteOptionResultOutput> voteOptionResultOutputs;
@@ -42,6 +46,7 @@ public class ResultOutputMapperTest {
         given(voteOptionResultOutputCollectionMapper.map(pollEntity, voteOptions)).willReturn(voteOptionResultOutputs);
         given(pollEntity.getEnabled()).willReturn(Boolean.TRUE);
         given(pollEntity.getClose()).willReturn(endDateTime);
+        given(resultCalculator.calculate(voteOptionResultOutputs)).willReturn(MESSAGE);
     }
 
     @Test
@@ -53,6 +58,7 @@ public class ResultOutputMapperTest {
         assertEquals(MEETING_ID, actualValue.getMeetingId());
         assertEquals(voteOptionResultOutputs, actualValue.getVotes());
         assertEquals(endDateTime, actualValue.getCloseDate());
+        assertEquals(MESSAGE, actualValue.getMessage());
         assertTrue(actualValue.getOpen());
     }
 

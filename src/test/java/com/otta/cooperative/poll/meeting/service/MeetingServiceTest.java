@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -17,7 +19,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.SchedulerException;
@@ -48,7 +49,6 @@ public class MeetingServiceTest {
     private static final String OPEN = "open";
     private static final String UNKNOWN = "unknown";
 
-    @InjectMocks
     private MeetingService meetingService;
 
     @Mock
@@ -90,9 +90,11 @@ public class MeetingServiceTest {
     private ResultOutput resultOutput;
 
     private LocalDateTime closeDate;
-
     @BeforeEach
     protected void setUp() {
+        meetingService = spy(new MeetingService(meetingRepository, meetingEntityMapper, meetingOutputMapper,
+                pollEntityMapper, pollOutputMapper, pollEndJobScheduler, voteOptionRepository, pollEntityExtractor,
+                resultOutputMapper));
         closeDate = LocalDateTime.now();
     }
 
@@ -192,14 +194,31 @@ public class MeetingServiceTest {
     @Test
     public void shouldCorrectlyGenerateResult() {
         // given
-        given(meetingRepository.findById(MEETING_ID)).willReturn(Optional.of(meetingEntity));
-        given(voteOptionRepository.findAll()).willReturn(Lists.list(voteOptionEntity));
-        given(pollEntityExtractor.extract(Optional.of(meetingEntity))).willReturn(Optional.of(pollEntity));
-        given(resultOutputMapper.map(MEETING_ID, pollEntity, Lists.list(voteOptionEntity))).willReturn(resultOutput);
+        when(meetingService.getLocalDateTimeNow()).thenReturn(LocalDateTime.MAX);
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.of(meetingEntity));
+        when(voteOptionRepository.findAll()).thenReturn(Lists.list(voteOptionEntity));
+        when(pollEntityExtractor.extract(Optional.of(meetingEntity))).thenReturn(Optional.of(pollEntity));
+        when(pollEntity.getClose()).thenReturn(closeDate);
+        when(resultOutputMapper.map(MEETING_ID, pollEntity, Lists.list(voteOptionEntity))).thenReturn(resultOutput);
         // when
         ResultOutput actualValue = meetingService.generateResult(MEETING_ID);
         // then
         assertEquals(resultOutput, actualValue);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenGeneratingResultsForAOpenPoll() {
+        // given
+        when(meetingService.getLocalDateTimeNow()).thenReturn(LocalDateTime.MIN);
+        when(meetingRepository.findById(MEETING_ID)).thenReturn(Optional.of(meetingEntity));
+        when(voteOptionRepository.findAll()).thenReturn(Lists.list(voteOptionEntity));
+        when(pollEntityExtractor.extract(Optional.of(meetingEntity))).thenReturn(Optional.of(pollEntity));
+        when(pollEntity.getClose()).thenReturn(closeDate);
+        // when
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            meetingService.generateResult(MEETING_ID);
+        });
+        // then
     }
 
     @Test

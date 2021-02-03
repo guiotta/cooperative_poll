@@ -1,5 +1,6 @@
 package com.otta.cooperative.poll.meeting.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -107,10 +108,18 @@ public class MeetingService {
 
         if (optionalPollEntity.isPresent()) {
             PollEntity pollEntity = optionalPollEntity.get();
-            LOGGER.debug("Generating result for Poll {}.", pollEntity);
 
-            return resultOutputMapper.map(meetingId, pollEntity, voteOptions);
+            if (pollEntity.getClose().isBefore(this.getLocalDateTimeNow())) {
+                LOGGER.debug("Generating result for Poll {}.", pollEntity);
+
+                return resultOutputMapper.map(meetingId, pollEntity, voteOptions);
+            }
+            throw new IllegalArgumentException(String.format("Poll is not closed yet. Close date time: %s.", pollEntity.getClose()));
         }
         throw new IllegalArgumentException(String.format("Could not find a meeting or poll with id %d.", meetingId));
+    }
+
+    protected LocalDateTime getLocalDateTimeNow() {
+        return LocalDateTime.now();
     }
 }
