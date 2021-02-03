@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:./data/poll
+    username: sa 
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: true
+  h2:
+    console:
+      enabled: true
+
+flyway:
+  user: sa
+  password: password
+  schemas: registry
+  url: jdbc:h2:./data/poll
+  locations: filesystem:db/migration
